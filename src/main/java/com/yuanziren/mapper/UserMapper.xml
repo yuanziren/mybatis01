@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--
+  1.命名空间配置  全局唯一  包名+文件名
+  2.配置Mapped Statement
+  3. statement配置
+       id 值声明statement编号  同一命名空间(同一文件)下不可重复
+       parameterType  输入参数即占位符的数据类型  类型可以是 基本数据类型,字符串,java bean ,map,list等
+       resultType     输出结果  类型可以是基本数据类型,字符串,java bean,map等
+       statement 描述 即待执行的sql
+       #{id}  占位符  变量名为id/value 均可   ${value}  变量名必须为value 字符串拼接形式  无法避免sql 注入
+ -->
+<mapper namespace="com.yuanziren.mapper.UserMapper">
+
+    <sql id="base">
+        id,user_name as userName,user_pwd as userPwd
+    </sql>
+
+    <!-- select -->
+    <!-- 基本数据类型: int String -->
+    <select id="queryUserById" parameterType="int"  resultType="user">
+        select <include refid="base"/> from user where id=#{id}
+    </select>
+
+    <resultMap id="baseResult" type="user">
+        <id column="id" property="id"></id>
+        <result column="user_name" property="userName"></result>
+        <result column="user_pwd" property="userPwd"></result>
+    </resultMap>
+
+    <!-- String -->
+    <select id="queryUserByName" parameterType="string"  resultMap="baseResult">
+        select * from user where user_name=#{userName}
+    </select>
+
+
+
+
+    <!-- Bean -->
+    <select id="queryUserByUser" parameterType="user"  resultType="user">
+        select id,user_name as userName,user_pwd as userPwd from user where user_name=#{userName}
+    </select>
+    <!-- Map -->
+    <select id="queryUserByMap" parameterType="map"  resultType="user">
+        select id,user_name as userName,user_pwd as userPwd from user where user_name=#{userName}
+    </select>
+
+    <select id="queryUserByNameAndId" resultType="user">
+        select id,user_name as userName,user_pwd as userPwd from user
+        where user_name=#{userName} and id=#{id}
+    </select>
+
+    <!-- 输出 -->
+    <select id="queryUserTotal" resultType="int">
+        select count(*) from user
+    </select>
+    <select id="queryUserNameById" parameterType="int" resultType="string">
+        select user_name as userName from user WHERE id=#{id}
+    </select>
+
+    <select id="queryUserMapById" parameterType="int" resultType="map">
+        select * from user WHERE id=#{id}
+    </select>
+
+    <select id="queryUserList" resultType="user">
+        select * from user
+    </select>
+
+
+    <!-- insert -->
+    <!-- 普通添加 -->
+    <insert id="addUserNoKey" parameterType="user">
+    INSERT INTO user (user_name,user_pwd,real_name,nation,card_id)
+    VALUES
+        (#{userName},#{userPwd},#{realName},#{nation},#{cardId})
+    </insert>
+    <!-- 普通添加 -->
+    <insert id="addUserHasKey" parameterType="user">
+        <selectKey keyProperty="id" order="AFTER" resultType="int">
+            select LAST_INSERT_ID() as id
+        </selectKey>
+        INSERT INTO user (user_name,user_pwd,real_name,nation,card_id)
+        VALUES
+        (#{userName},#{userPwd},#{realName},#{nation},#{cardId})
+    </insert>
+
+    <insert id="addUserHasKey2" parameterType="user" useGeneratedKeys="true" keyProperty="id">
+    INSERT INTO user (user_name,user_pwd,real_name,nation,card_id)
+    VALUES
+    (#{userName},#{userPwd},#{realName},#{nation},#{cardId})
+    </insert>
+
+
+    <insert id="addUserBatch" parameterType="list">
+        INSERT INTO user (user_name,user_pwd,real_name,nation,card_id)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.userName},#{item.userPwd},#{item.realName},#{item.nation},#{item.cardId})
+        </foreach>
+    </insert>
+
+
+
+    <!-- update -->parameterType="user"
+    <update id="updateUserById" >
+        UPDATE user set user_name=#{userName} WHERE id=#{id}
+    </update>
+
+    <update id="updateUserPwd">
+        UPDATE user set user_pwd='888888' WHERE id in (
+        <foreach collection="array" item="item" separator=",">
+            #{item}
+        </foreach>
+        )
+    </update>
+
+
+    <!-- delete -->
+    <delete id="deleteUserById" parameterType="int">
+        DELETE from user WHERE id=#{id}
+    </delete>
+    <delete id="deleteUserBatch">
+        DELETE from user WHERE id in (
+        <foreach collection="array" item="item" separator=",">
+            #{item}
+        </foreach>
+        )
+    </delete>
+</mapper>

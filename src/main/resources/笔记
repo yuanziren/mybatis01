@@ -1,0 +1,41 @@
+Mapper的使用
+    1.select标签：
+        输入（parameterType=""）:基本数据类型、字符串、数组、List、Map、JavaBean
+        输出（resultType=""）:基本数据类型、字符串、数组、List、Map、JavaBean
+    2.Insert标签
+        普通添加(parameterType="")
+        添加返回主键
+            两种方式：
+                2.1  <insert id="addUserHasKey" parameterType="user">
+                             <selectKey keyProperty="id" order="AFTER" resultType="int">
+                                 select LAST_INSERT_ID() as id
+                             </selectKey>
+                    </insert>
+                2.2 <insert id="addUserHasKey2" parameterType="user" useGeneratedKeys="true" keyProperty="id">
+                    </insert>
+        批量添加（parameterType="list"）
+            使用foreach
+                <foreach collection="list" item="item" separator=",">
+                            (#{item.userName},#{item.userPwd},#{item.realName},#{item.nation},#{item.cardId})
+                 </foreach>
+    3.Update标签
+        单条更新
+        批量更新
+    4.Delete标签
+        单条删除
+        批量删除
+    5.其他标签
+        <sql>：把常用的字段提出来放在sql标签中，需要时候使用<include refid="##"/>标签引入进来
+        <resultMap>
+    6.注意:${}和#{}区别
+    7.resultMap和resultType区别
+        7.1 如果使用的是resultType，返回的是基本数据类型、字符串、数组、List、Map、JavaBean等,
+        使用时候要注意给字段添加别名，用as。数据库的字段名要和映射的类中的字段对应起来
+        7.2 如果使用的是resultMap,示例：
+             <resultMap id="baseResult" type="user">
+                    <id column="id" property="id"></id>
+                    <result column="user_name" property="userName"></result>
+                    <result column="user_pwd" property="userPwd"></result>
+             </resultMap>
+             主键使用id标签，非主键使用result标签。
+             为了提高代码复用率，resultMap可以使用extends继承之前写过的resultMap
